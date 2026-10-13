@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <title>Echoes of the Abyss</title>
+  <link rel="stylesheet" href="css/game.css">
+</head>
+<body>
+  <!-- 3D Canvas Container -->
+  <div id="canvas-container">
+    <canvas id="game-canvas"></canvas>
+  </div>
+
+  <!-- Screen Atmosphere & Post Processing Vignette -->
+  <div id="screen-effects"></div>
+
+  <!-- Touch Controls Layer (Virtual Joystick & Look Drag) -->
+  <div id="touch-controls-layer">
+    <div id="joystick-zone">
+      <div id="joystick-thumb"></div>
+    </div>
+  </div>
+
+  <!-- Main HUD Overlay -->
+  <div id="hud-overlay">
+    <!-- Top HUD Bar -->
+    <div class="top-hud-bar">
+      <div class="location-badge">
+        <span class="location-title" id="hud-region-name">The Forgotten Shore</span>
+        <span class="location-sub">Survey Sector 01</span>
+      </div>
+
+      <div class="compass-wrapper">
+        <span class="compass-heading" id="compass-heading">N 0°</span>
+      </div>
+
+      <div class="stealth-eye-indicator" id="stealth-eye">
+        <span style="font-size: 14px;">👁️</span>
+        <span class="stealth-label" id="stealth-label">CLEAR</span>
+      </div>
+    </div>
+
+    <!-- Center Crosshair & Context Interaction Prompt -->
+    <div id="crosshair"></div>
+    <div id="interact-prompt">E - Interact</div>
+
+    <!-- Toast Notification Banner -->
+    <div id="toast-notification">DISCOVERY MADE</div>
+
+    <!-- Quest Objective Banner -->
+    <div class="quest-banner">
+      <div class="quest-label" id="quest-banner-title">CHAPTER 1: WAKING ON THE SHORE</div>
+      <div class="quest-text" id="quest-banner-desc">Search the shipwreck for supplies (Scrap Metal and Emergency Rations).</div>
+    </div>
+
+    <!-- Bottom HUD Bar -->
+    <div class="bottom-hud-bar">
+      <!-- Survival Vitals -->
+      <div class="vitals-container">
+        <div class="vital-row">
+          <span class="vital-icon">❤️</span>
+          <div class="vital-track">
+            <div class="vital-fill health" id="vital-health" style="width: 100%;"></div>
+          </div>
+        </div>
+        <div class="vital-row">
+          <span class="vital-icon">⚡</span>
+          <div class="vital-track">
+            <div class="vital-fill stamina" id="vital-stamina" style="width: 100%;"></div>
+          </div>
+        </div>
+        <div class="vital-row">
+          <span class="vital-icon">🍞</span>
+          <div class="vital-track">
+            <div class="vital-fill hunger" id="vital-hunger" style="width: 100%;"></div>
+          </div>
+        </div>
+        <div class="vital-row" id="vital-row-oxygen" style="display: none;">
+          <span class="vital-icon">🫧</span>
+          <div class="vital-track">
+            <div class="vital-fill oxygen" id="vital-oxygen" style="width: 100%;"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Echo Vision Ability Button -->
+      <div class="echo-ability-container">
+        <button class="echo-btn" id="btn-echo-vision" title="Echo Vision (Q)">
+          <span class="echo-icon">📡</span>
+          <span class="echo-label">ECHO [Q]</span>
+        </button>
+      </div>
+
+      <!-- Tactical Action Buttons -->
+      <div class="action-buttons-group">
+        <button class="hud-circle-btn" id="btn-sprint" title="Sprint (Shift)">RUN</button>
+        <button class="hud-circle-btn" id="btn-crouch" title="Crouch (Ctrl)">SNEAK</button>
+        <button class="hud-circle-btn" id="btn-jump" title="Jump (Space)">JUMP</button>
+        <button class="hud-circle-btn" id="btn-flashlight" title="Flashlight (F)">🔦</button>
+        <button class="hud-circle-btn" id="btn-inv" onclick="window.toggleInventory()">🎒</button>
+        <button class="hud-circle-btn" id="btn-map" onclick="window.toggleMap()">🗺️</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Inventory & Crafting Modal -->
+  <div class="game-modal" id="inventory-modal">
+    <div class="modal-header">
+      <div class="modal-title"><span>🎒</span> Survival Inventory</div>
+      <button class="modal-close-btn" onclick="window.gameApp.closeModals()">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="inv-grid" id="inv-grid-container"></div>
+    </div>
+  </div>
+
+  <!-- Island Map Modal -->
+  <div class="game-modal" id="map-modal">
+    <div class="modal-header">
+      <div class="modal-title"><span>🗺️</span> Charted Island Map</div>
+      <button class="modal-close-btn" onclick="window.gameApp.closeModals()">✕</button>
+    </div>
+    <div class="modal-body" style="height: calc(100% - 70px);">
+      <div class="map-canvas-container">
+        <canvas id="island-map-canvas"></canvas>
+      </div>
+    </div>
+  </div>
+
+  <!-- Ending Choice Modal -->
+  <div class="game-modal" id="ending-choice-modal">
+    <div class="modal-header">
+      <div class="modal-title"><span>🌌</span> The Threshold of the Abyss</div>
+    </div>
+    <div class="modal-body" style="display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; gap: 20px;">
+      <p style="max-width: 500px; color: #94a3b8; font-size: 14px; line-height: 1.6;">
+        All three ancient keystones resonate in the pedestals. The Abyssal Gate roars with cosmic energy. Your journey has reached the decisive moment. How will you conclude your story?
+      </p>
+      <div style="display: flex; flex-direction: column; gap: 12px; width: 320px;">
+        <button onclick="window.gameApp.chooseEnding('escape')" style="background: #0284c7; color: #fff; padding: 14px; border: none; border-radius: 10px; font-weight: 800; font-size: 13px; cursor: pointer;">
+          1. TRANSMIT RESCUE SIGNAL (ESCAPE)
+        </button>
+        <button onclick="window.gameApp.chooseEnding('awakening')" style="background: #9333ea; color: #fff; padding: 14px; border: none; border-radius: 10px; font-weight: 800; font-size: 13px; cursor: pointer;">
+          2. STEP INTO THE VORTEX (AWAKENING)
+        </button>
+        <button onclick="window.gameApp.chooseEnding('guardian')" style="background: #059669; color: #fff; padding: 14px; border: none; border-radius: 10px; font-weight: 800; font-size: 13px; cursor: pointer;">
+          3. SEAL THE GATE FOREVER (GUARDIAN)
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Scripts -->
+  <script src="js/three.min.js"></script>
+  <script src="js/audio-synth.js"></script>
+  <script src="js/game-world.js"></script>
+  <script src="js/game-entities.js"></script>
+  <script src="js/player-controller.js"></script>
+  <script src="js/game-main.js"></script>
+</body>
+</html>

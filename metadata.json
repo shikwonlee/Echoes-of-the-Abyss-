@@ -1,0 +1,6 @@
+{
+  "name": "Echoes of the Abyss",
+  "description": "3D survival adventure game set on an mysterious island with dynamic weather, echo vision, and ancient mysteries.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
